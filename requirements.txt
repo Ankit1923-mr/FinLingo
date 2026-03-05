@@ -1,0 +1,11 @@
+transformers==4.40.0
+peft==0.10.0
+bitsandbytes==0.43.1
+datasets==2.19.0
+trl==0.8.6
+wandb
+accelerate
+scipy
+evaluate
+rouge_score
+matplotlib
