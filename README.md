@@ -1,6 +1,6 @@
 # FinLingo: Financial Instruction-Tuned LLM using QLoRA
 
-![Comprehensive FinLingo Overview](assets\image-1.png)
+![Comprehensive FinLingo Overview](assets/image-1.png)
 
 FinLingo is a parameter-efficient fine-tuning (PEFT) project that adapts a large language model for financial instruction-following and question-answering tasks. 
 
