@@ -1,99 +1,39 @@
-FinLingo
+# FinLingo: Financial Instruction-Tuned LLM using QLoRA
 
-========
+FinLingo is a parameter-efficient fine-tuning (PEFT) project that adapts a large language model for financial instruction-following and question-answering tasks. 
 
+By utilizing **QLoRA (Quantized Low-Rank Adaptation)** on a 4-bit quantized Llama-3 base model, this project demonstrates how to execute large language model training on highly constrained consumer-grade hardware, specifically an NVIDIA T4 GPU. The repository represents a production-style LLM training pipeline complete with modular code, reproducible experiments, hardware-specific optimizations, and evaluation metrics.
 
+## 🎯 Project Objectives
 
-### Financial Instruction-Tuned LLM using QLoRA
+* **Fine-tune** a large language model for domain-specific financial tasks.
+* **Demonstrate** QLoRA training on limited consumer GPU hardware (NVIDIA T4).
+* **Build** a clean, modular ML engineering pipeline.
+* **Implement** evaluation pipelines using ROUGE metrics.
+* **Track** experimental configurations and model runs using Weights & Biases (W&B).
 
+---
 
+## 🏗️ Project Architecture
 
-FinLingo is a **parameter-efficient fine-tuning project** that adapts a large language model for **financial instruction-following and question answering**.
-
-
-
-The model is trained using **QLoRA (Quantized Low Rank Adaptation)** on a **4-bit quantized Llama-3 base model**, allowing large language model training on **limited GPU resources such as an NVIDIA T4**.
-
-
-
-The goal of this project is to demonstrate a **production-style LLM training pipeline** with modular code, reproducible experiments, and evaluation metrics.
-
-
-
-* * * * *
-
-
-
-Project Objectives
-
-==================
-
-
-
--   Fine-tune a large language model for **financial domain tasks**
-
-
-
--   Demonstrate **QLoRA training on consumer GPU hardware**
-
-
-
--   Build a **clean, modular ML engineering pipeline**
-
-
-
--   Implement **evaluation using ROUGE metrics**
-
-
-
--   Track experiments using **Weights & Biases**
-
-
-
-* * * * *
-
-
-
-Project Architecture
-
-====================
-
-
-
-finlingo/
-
+```text
+FinLingo/
 │
-
 ├── data/
-
-│   └── prepare_dataset.py
-
+│   └── prepare_dataset.py
 │
-
 ├── training/
-
-│   └── train_qlora.py
-
+│   └── train_qlora.py
 │
-
 ├── evaluation/
-
-│   └── evaluate_model.py
-
+│   └── evaluate_model.py
 │
-
 ├── processed_data/
-
 │
-
 ├── finlingo_outputs/
-
 │
-
 ├── requirements.txt
-
 │
-
 └── README.md
 
 
@@ -102,539 +42,201 @@ finlingo/
 
 
 
-Dataset
+📊 Dataset & Prompt Formatting
+------------------------------
 
-=======
+This project uses the [Finance Alpaca Dataset](https://huggingface.co/datasets/gbharti/finance-alpaca), which contains thousands of financial instruction-response pairs designed specifically for training and fine-tuning LLMs.
 
+### Example Prompt Transformation
 
+The dataset is transformed into a strict instruction-following format to ensure compatibility with instruction-tuned LLM architectures:
 
-This project uses the **Finance Alpaca Dataset**:
+Plaintext
 
+```
+### Instruction:
+What is a stock dividend?
 
-
-<https://huggingface.co/datasets/gbharti/finance-alpaca>
-
-
-
-The dataset contains financial instruction-response pairs designed for training LLMs.
-
-
-
-Example:
-
-
-
-Instruction: What is a stock dividend?\
-
-Response: A stock dividend is a payment made by a corporation to its shareholders.
-
-
-
-* * * * *
-
-
-
-Prompt Formatting
-
-=================
-
-
-
-The dataset is transformed into a strict **instruction-following format**:
-
-
-
-### Instruction:\
-
-<Question>
-
-
-
-### Input:\
-
+### Input:
 <context if available>
 
+### Response:
+A stock dividend is a payment made by a corporation to its shareholders.
 
-
-### Response:\
-
-<answer>
-
-
-
-This formatting ensures compatibility with **instruction-tuned LLM architectures**.
-
-
+```
 
 * * * * *
 
+⚙️ Installation & Requirements
+------------------------------
 
+Clone the repository and install the dependencies:
 
-Installation
+Bash
 
-============
-
-
-
-Clone the repository:
-
-
-
-git clone https://github.com/Ankit1923-mr/01-finlingo.git\
-
+```
+git clone [https://github.com/Ankit1923-mr/01-finlingo.git](https://github.com/Ankit1923-mr/01-finlingo.git)
 cd 01-finlingo
-
-
-
-Install dependencies:
-
-
-
 pip install -r requirements.txt
 
+```
 
+### Dependencies
 
-* * * * *
+-   `transformers==4.40.0`
 
+-   `peft==0.10.0`
 
+-   `bitsandbytes==0.43.1`
 
-Requirements
+-   `datasets==2.19.0`
 
-============
+-   `trl==0.8.6`
 
-
-
-transformers==4.40.0\
-
-peft==0.10.0\
-
-bitsandbytes==0.43.1\
-
-datasets==2.19.0\
-
-trl==0.8.6\
-
-wandb\
-
-accelerate\
-
-scipy\
-
-evaluate\
-
-rouge_score\
-
-matplotlib
-
-
+-   `wandb`, `accelerate`, `scipy`, `evaluate`, `rouge_score`, `matplotlib`
 
 * * * * *
 
 
+🛠️ Pipeline Execution
+----------------------
 
-Data Preparation
+### 1\. Data Preparation
 
-================
+Run the dataset preparation script to download, format, filter, and store the dataset locally.
 
+Bash
 
-
-Run the dataset preparation script:
-
-
-
+```
 python data/prepare_dataset.py
 
+```
 
+*Note: The processed dataset is stored in `processed_data/finlingo_train`. Saving the dataset locally ensures that training scripts do not bottleneck on repeated network requests.*
 
-This script performs:
+### 2\. Model Training (QLoRA)
 
+Execute the main training loop:
 
+Bash
 
-1.  Dataset download
-
-
-
-2.  Prompt formatting
-
-
-
-3.  Data filtering
-
-
-
-4.  Local dataset storage
-
-
-
-The processed dataset is stored in:
-
-
-
-processed_data/finlingo_train
-
-
-
-Saving the dataset locally ensures that **training scripts do not repeatedly download the dataset**.
-
-
-
-* * * * *
-
-
-
-Model Training (QLoRA)
-
-======================
-
-
-
-Training is implemented in:
-
-
-
-training/train_qlora.py
-
-
-
-Run training using:
-
-
-
+```
 python training/train_qlora.py
 
+```
 
+#### Training Configuration
 
-### Training Configuration
-
-
-
-| Parameter | Value |
-
+| **Parameter** | **Value** |
 | --- | --- |
-
-| Base Model | Llama-3 8B |
-
-| Quantization | 4-bit NF4 |
-
-| Adapter Method | LoRA |
-
-| LoRA Rank | 8 |
-
-| Batch Size | 2 |
-
-| Gradient Accumulation | 2 |
-
-| Optimizer | paged_adamw_8bit |
-
-| Max Steps | 40 |
-
-| GPU | NVIDIA T4 |
-
-
-
-* * * * *
-
-
-
-Why QLoRA?
-
-==========
-
-
-
-Training an 8B parameter model normally requires **tens of gigabytes of GPU memory**.
-
-
-
-QLoRA solves this by combining:
-
-
-
-### 4-bit Quantization
-
-
-
-The base model weights are compressed to **4-bit precision**, reducing memory usage dramatically.
-
-
-
-### LoRA Adapters
-
-
-
-Instead of training the full model, **only small low-rank matrices are trained**.
-
-
-
-### Frozen Base Model
-
-
-
-The original model parameters remain frozen, drastically reducing computation cost.
-
-
-
-This allows training **large models on a single T4 GPU**.
-
-
-
-* * * * *
-
-
-
-Experiment Tracking
-
-===================
-
-
-
-Training experiments are logged using **Weights & Biases**.
-
-
-
-Metrics tracked include:
-
-
-
--   training loss
-
-
-
--   step progress
-
-
-
--   learning rate
-
-
-
-Initialization occurs automatically during training:
-
-
-
-wandb.init(project="finlingo-experiment")
-
-
-
-* * * * *
-
-
-
-Model Evaluation
-
-================
-
-
-
-Evaluation is implemented in:
-
-
-
-evaluation/evaluate_model.py
-
-
-
-Run evaluation:
-
-
-
+| **Base Model** | Llama-3 8B |
+| **Quantization** | 4-bit NF4 |
+| **Adapter Method** | LoRA |
+| **LoRA Rank** | 8 |
+| **Batch Size** | 2 |
+| **Gradient Accumulation** | 2 |
+| **Optimizer** | paged_adamw_8bit |
+| **Max Steps** | 40 |
+| **Hardware** | NVIDIA T4 GPU |
+
+### 3\. Model Evaluation
+
+Evaluate the fine-tuned adapter against test queries, calculating ROUGE metrics.
+
+Bash
+
+```
 python evaluation/evaluate_model.py
 
+```
 
+**Example Output:**
 
-The evaluation pipeline:
-
-
-
-1.  Loads the trained LoRA adapter
-
-
-
-2.  Generates responses for test queries
-
-
-
-3.  Calculates **ROUGE metrics**
-
-
-
-Example test query:
-
-
-
-What is a stock dividend?
-
-
+> **Instruction:** What is a stock dividend?
+>
+> **Generated Output:** A stock dividend is a distribution of additional shares issued by a corporation to its shareholders instead of cash payments.
 
 * * * * *
 
+🧠 Why QLoRA?
+-------------
+
+Training an 8B parameter model in full precision requires tens of gigabytes of GPU memory. QLoRA solves this hardware bottleneck by combining:
+
+1.  **4-bit Quantization:** The base model weights are compressed to 4-bit precision, reducing memory usage dramatically.
+
+2.  **LoRA Adapters:** Instead of training the full model, only small, low-rank matrices are trained.
+
+3.  **Frozen Base Model:** The original model parameters remain frozen, drastically reducing computational cost and allowing training on a single T4 GPU.
 
 
-Example Model Output
+📈 LoRA Rank Experiments: Memory vs. Performance
+------------------------------------------------
 
-====================
+To determine the optimal system tradeoff between resource utilization and output quality, experiments were run across different LoRA ranks (`r`).
 
+| **LoRA Rank (r)** | **Training Loss (Epoch 2)** | **Peak GPU Memory** | **ROUGE-L Impact** |
+| --- | --- | --- | --- |
+| **4** | 2.655730 | 3.67 GB | Baseline |
+| **8** | 2.652314 | 3.67 GB | Minimal change |
+| **16** | 2.645862 | 3.68 GB | Minimal change |
 
+**Conclusion:** Increasing the LoRA rank from 4 to 16 slightly decreased training loss (2.655 down to 2.645) with a negligible peak memory increase (~10MB difference). Output quality (ROUGE-L score) remained highly stable across all ranks, indicating that a rank of 8 is a highly efficient sweet spot for this specific financial instruction dataset.
 
-Prompt:
+!(image-1.png)
+* * * * *
 
+🐛 Handling Hardware Constraints: The NVIDIA T4 `bfloat16` Bug
+--------------------------------------------------------------
 
+During the QLoRA training initialization, a critical hardware compatibility issue specific to the **NVIDIA T4 GPU** was encountered.
 
-### Instruction:\
+**The Problem:**
 
-What is a stock dividend?
+The base Llama-3 model expects `bfloat16` precision, which is natively supported on newer GPU architectures (Ampere and later). However, the NVIDIA T4 utilizes the Turing architecture, which lacks native hardware support for `bfloat16` gradient scaling. Consequently, when PyTorch attempted mixed-precision training during backpropagation, the loop failed with a `NotImplementedError` originating from the PyTorch `GradScaler`.
 
+**The Solution:**
 
+To resolve this, a custom parameter initialization loop was implemented during model setup.
 
-### Response:
+-   The loop iterates through the PEFT model parameters and explicitly casts **only the trainable LoRA adapter tensors** from `bfloat16` to `float32`.
 
+-   Because QLoRA drastically reduces the trainable parameter footprint (approx. 6 million parameters vs. the 8 billion base parameters), computing gradients in full 32-bit precision introduced virtually zero VRAM overhead.
 
-
-Generated Output:
-
-
-
-A stock dividend is a distribution of additional shares issued by a corporation to its shareholders instead of cash payments.
-
-
+-   This bypassed the T4's mixed-precision hardware limitation completely, stabilizing the training loop and enabling successful fine-tuning on a single consumer GPU.
 
 * * * * *
 
+🚀 Key Technologies
+-------------------
 
+-   **PyTorch** & **HuggingFace Transformers**
 
-Handling Hardware Constraints & Architecture Bugs
+-   **PEFT** (Parameter-Efficient Fine-Tuning)
 
-=================================================
+-   **QLoRA** & **BitsAndBytes**
 
+-   **TRL** (Transformer Reinforcement Learning)
 
+-   **Weights & Biases (W&B)**
 
-During the QLoRA training initialization, I encountered a critical **hardware compatibility issue specific to the NVIDIA T4 GPU**.
+* * * * *
 
+🔮 Future Improvements
+----------------------
 
+-   [ ] Train on larger, more complex financial datasets (e.g., earnings call transcripts).
 
-The base **Llama-3 model expects `bfloat16` precision**, which is commonly supported on newer GPU architectures (such as Ampere and later). However, the **NVIDIA T4 GPU uses the Turing architecture**, which **does not provide native hardware support for `bfloat16` gradient scaling**.
+-   [ ] Integrate **Retrieval-Augmented Generation (RAG)** to ground answers in real-time market data.
 
+-   [ ] Add formal financial reasoning benchmarks (e.g., FinQA).
 
+-   [ ] Deploy the fine-tuned model as a microservice using **FastAPI** or HuggingFace Inference Endpoints.
 
-Because of this limitation, when PyTorch attempted to perform mixed-precision training during backpropagation, the training loop failed with a **`NotImplementedError` originating from PyTorch's `GradScaler`**, which could not execute gradient operations on `bfloat16` tensors on the T4.
+* * * * *
 
-
-
-The Solution
-
+👨‍💻 Author
 ------------
 
-
-
-To resolve the issue, I implemented a **custom parameter initialization loop** during model setup.
-
-
-
-This loop iterates through the PEFT model parameters and **explicitly casts only the trainable LoRA adapter tensors from `bfloat16` to `float32`**.
-
-
-
-Since **QLoRA dramatically reduces the number of trainable parameters**, the LoRA adapters contained **approximately 6 million parameters** compared to the **8 billion parameters in the base model**.
-
-
-
-Because of this drastic reduction, **computing gradients in full 32-bit precision introduced negligible VRAM overhead**, while completely bypassing the T4's mixed-precision hardware limitation.
-
-
-
-This modification **stabilized the training loop and allowed QLoRA fine-tuning to run successfully on a single NVIDIA T4 GPU**.
-
-
-
-* * * * *
-
-
-
-Key Technologies
-
-================
-
-
-
--   PyTorch
-
-
-
--   HuggingFace Transformers
-
-
-
--   PEFT (Parameter Efficient Fine Tuning)
-
-
-
--   QLoRA
-
-
-
--   BitsAndBytes
-
-
-
--   TRL (Transformer Reinforcement Learning)
-
-
-
--   Weights & Biases
-
-
-
-* * * * *
-
-
-
-Future Improvements
-
-===================
-
-
-
-Possible extensions of this project include:
-
-
-
--   Training on larger financial datasets
-
-
-
--   Increasing LoRA rank for improved performance
-
-
-
--   Integrating **Retrieval Augmented Generation (RAG)**
-
-
-
--   Adding financial reasoning benchmarks
-
-
-
--   Deploying the model using **FastAPI or HuggingFace Inference API**
-
-
-
-* * * * *
-
-
-
-Author
-
-======
-
-
-
-**Ankit Kumar**
-
-
-
-GitHub:\
-
-<https://github.com/Ankit1923-mr>
-
-
+**Ankit Kumar** GitHub: [@Ankit1923-mr](https://github.com/Ankit1923-mr)
 
